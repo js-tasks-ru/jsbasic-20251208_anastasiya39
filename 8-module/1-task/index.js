@@ -33,53 +33,52 @@ export default class CartIcon {
     }
   }
 
-  updatePosition() {
-
-    if (!this.elem.offsetHeight) {return;} // not visible
-
-    if (!this.initialTopCoord) {
-      this.initialTopCoord = this.elem.getBoundingClientRect().top + window.pageYOffset;
-    }
-
-    if (document.documentElement.clientWidth <= 767) {
-      // mobile: cart is always fixed
-      this.resetPosition();
-      return;
-    }
-
-    let isHeaderCartScrolled = window.pageYOffset > this.initialTopCoord;
-
-    if (isHeaderCartScrolled) {
-      this.fixPosition();
-    } else {
-      this.resetPosition();
-    }
-  }
-
-  fixPosition() {
-    Object.assign(this.elem.style, {
-      position: 'fixed',
-      top: '50px',
-      zIndex: 1e3,
-      left: Math.min(
-        // справа от содержимого (определяем по первому контейнеру в нашей вёрстке)
-        document.querySelector('.container').getBoundingClientRect().right + 20,
-        document.documentElement.clientWidth - this.elem.offsetWidth - 10
-      ) + 'px'
-    });
-  }
-
-  resetPosition() {
-    Object.assign(this.elem.style, {
-      position: '',
-      top: '',
-      left: '',
-      zIndex: ''
-    });
-  }
-
   addEventListeners() {
     document.addEventListener('scroll', () => this.updatePosition());
     window.addEventListener('resize', () => this.updatePosition());
+  }
+
+  updatePosition() {
+    if (!this.elem.offsetWidth || !this.elem.offsetHeight) {
+      return;
+    }
+
+    if (document.documentElement.clientWidth <= 767) {
+      Object.assign(this.elem.style, {
+        position: '',
+        top: '',
+        left: '',
+        zIndex: '',
+      });
+      return;
+    }
+
+    if (!this.initialTopCoord) {
+      this.initialTopCoord =
+        this.elem.getBoundingClientRect().top + window.pageYOffset;
+    }
+
+    if (window.pageYOffset > this.initialTopCoord) {
+      const container = document.querySelector('.container');
+
+      const leftIndent = Math.min(
+        container.getBoundingClientRect().right + 20,
+        document.documentElement.clientWidth - this.elem.offsetWidth - 10
+      );
+
+      Object.assign(this.elem.style, {
+        position: 'fixed',
+        top: '50px',
+        left: `${leftIndent}px`,
+        zIndex: 1000,
+      });
+    } else {
+      Object.assign(this.elem.style, {
+        position: '',
+        top: '',
+        left: '',
+        zIndex: '',
+      });
+    }
   }
 }
